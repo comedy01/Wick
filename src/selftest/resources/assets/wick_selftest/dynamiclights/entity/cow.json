@@ -1,0 +1,10 @@
+{
+  "match": {
+    "type": "minecraft:cow"
+  },
+  "luminance": {
+    "type": "lambdynlights:wet_sensitive",
+    "dry": 7,
+    "wet": 3
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "match": {
+    "items": "othermod:glowing_thing"
+  },
+  "luminance": 8,
+  "silence_error": true
+}

@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "wick-selftest",
+	"version": "1.0.0",
+	"name": "Wick self test",
+	"description": "Development-only in-world checks for Wick. Not shipped.",
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.wick.selftest.fabric.WickSelfTestFabric"
+		]
+	},
+	"depends": {
+		"wick": "*"
+	},
+	"mixins": [
+		"wick_selftest.mixins.json"
+	]
+}

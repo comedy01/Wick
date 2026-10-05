@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "wick-showcase",
+	"version": "1.0.0",
+	"name": "Wick showcase",
+	"description": "Development-only film director for Wick's gallery video. Not shipped.",
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.wick.showcase.WickShowcaseFabric"
+		]
+	},
+	"depends": {
+		"wick": "*"
+	},
+	"mixins": [
+		"wick_showcase.mixins.json"
+	]
+}

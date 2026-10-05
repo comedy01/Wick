@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.wick.showcase.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"GameRendererHandMixin",
+		"HudHideMixin",
+		"MinecraftFrameMixin",
+		"MouseHandlerAccessor",
+		"ScreenCursorMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

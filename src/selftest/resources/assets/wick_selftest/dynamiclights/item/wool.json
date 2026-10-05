@@ -1,0 +1,10 @@
+{
+  "match": {
+    "items": "#minecraft:wool"
+  },
+  "luminance": {
+    "type": "block",
+    "block": "minecraft:glowstone"
+  },
+  "water_sensitive": true
+}

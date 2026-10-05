@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+issueTrackerURL="https://github.com/comedy01/Wick/issues"
+
+[[mods]]
+modId="wick"
+version="${version}"
+displayName="Wick"
+displayURL="https://github.com/comedy01/Wick"
+logoFile="assets/wick/icon128.png"
+authors="comedy01"
+description='''Dynamic lights. Hold a torch, lantern or lava bucket and the world lights up around you as you walk. Dropped torches, burning mobs and blazes shine too. Client-side only.'''
+
+[[dependencies.wick]]
+modId="forge"
+mandatory=true
+versionRange="${forge_range}"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.wick]]
+modId="minecraft"
+mandatory=true
+versionRange="${mc_range}"
+ordering="NONE"
+side="CLIENT"

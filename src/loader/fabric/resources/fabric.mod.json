@@ -1,0 +1,42 @@
+{
+	"schemaVersion": 1,
+	"id": "wick",
+	"version": "${version}",
+	"name": "Wick",
+	"description": "Dynamic lights. Hold a torch, lantern or lava bucket and the world lights up around you as you walk. Dropped torches, burning mobs and blazes shine too. Client-side only.",
+	"icon": {
+		"16": "assets/wick/icon16.png",
+		"32": "assets/wick/icon32.png",
+		"128": "assets/wick/icon128.png"
+	},
+	"authors": [
+		"comedy01"
+	],
+	"license": "MIT",
+	"contact": {
+		"homepage": "https://github.com/comedy01/Wick",
+		"sources": "https://github.com/comedy01/Wick",
+		"issues": "https://github.com/comedy01/Wick/issues"
+	},
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.wick.fabric.WickFabric"
+		],
+		"modmenu": [
+			"dev.wick.fabric.WickModMenu"
+		]
+	},
+	"mixins": [
+		"wick.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"fabric-api": "*",
+		"minecraft": "${range}",
+		"java": ">=${java_version}"
+	},
+	"suggests": {
+		"modmenu": "*"
+	}
+}

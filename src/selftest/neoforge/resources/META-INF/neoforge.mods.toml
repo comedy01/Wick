@@ -1,0 +1,11 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+
+[[mods]]
+modId="wick_selftest"
+version="1.0.0"
+displayName="Wick self test"
+
+[[mixins]]
+config="wick_selftest.mixins.json"

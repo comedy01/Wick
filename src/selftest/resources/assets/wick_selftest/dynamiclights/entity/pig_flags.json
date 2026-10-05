@@ -1,0 +1,9 @@
+{
+  "match": {
+    "type": "minecraft:pig",
+    "flags": {
+      "is_baby": true
+    }
+  },
+  "luminance": 12
+}

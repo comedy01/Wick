@@ -1,9 +1,9 @@
 package dev.wick.client;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mojang.serialization.DynamicOps;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -23,10 +23,12 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.function.ToIntFunction;
 
 public final class DataLights implements ResourceManagerReloadListener {
     private static final Logger LOGGER = LogManager.getLogger("wick");
+    private static final Gson GSON = new Gson();
     private static final String ITEMS = "dynamiclights/item";
     private static final String ENTITIES = "dynamiclights/entity";
 
@@ -87,11 +89,11 @@ public final class DataLights implements ResourceManagerReloadListener {
 
     private static List<Raw> read(ResourceManager manager, String directory) {
         List<Raw> found = new ArrayList<>();
-        for (var entry : manager.listResources(directory, id -> id.getPath().endsWith(".json")).entrySet()) {
-            try (Reader reader = entry.getValue().openAsReader()) {
-                JsonElement json = JsonParser.parseReader(reader);
+        for (Map.Entry<String, Callable<Reader>> entry : ResourceFiles.json(manager, directory)) {
+            try (Reader reader = entry.getValue().call()) {
+                JsonElement json = GSON.fromJson(reader, JsonElement.class);
                 if (json.isJsonObject()) {
-                    found.add(new Raw(entry.getKey().toString(), json.getAsJsonObject()));
+                    found.add(new Raw(entry.getKey(), json.getAsJsonObject()));
                 } else {
                     LOGGER.warn("Skipping light file {}: not a JSON object", entry.getKey());
                 }
@@ -137,9 +139,9 @@ public final class DataLights implements ResourceManagerReloadListener {
         for (Raw raw : entityFiles) {
             try {
                 JsonObject match = object(raw.json(), "match");
-                for (String key : match.keySet()) {
-                    if (!key.equals("type")) {
-                        throw new IllegalArgumentException("Wick only understands \"type\" in an entity match, not \"" + key + "\"");
+                for (Map.Entry<String, JsonElement> entry : match.entrySet()) {
+                    if (!entry.getKey().equals("type")) {
+                        throw new IllegalArgumentException("Wick only understands \"type\" in an entity match, not \"" + entry.getKey() + "\"");
                     }
                 }
                 List<EntityType<?>> types = DataCodecs.entityTypes(required(match, "type"), ops);

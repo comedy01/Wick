@@ -2,7 +2,6 @@ package dev.wick.client;
 
 import dev.wick.config.WickConfig;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -49,7 +48,7 @@ public final class ItemLights {
             return 0;
         }
         Item item = stack.getItem();
-        String id = IDS.computeIfAbsent(item, key -> BuiltInRegistries.ITEM.getKey(key).toString());
+        String id = IDS.computeIfAbsent(item, Vanilla::itemId);
         boolean wet = underwater && config.waterSensitive();
         if (wet && isFlame(id)) {
             return 0;

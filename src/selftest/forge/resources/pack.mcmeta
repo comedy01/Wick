@@ -1,6 +1,6 @@
 {
 	"pack": {
 		"description": "Wick self test resources",
-		"pack_format": 15
+		"pack_format": ${pack_format}
 	}
 }

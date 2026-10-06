@@ -107,7 +107,7 @@ public final class LightTracker {
         double reach = (double) config.range() * config.range();
         List<Candidate> found = new ArrayList<>();
         for (Entity entity : level.entitiesForRendering()) {
-            if (entity.isRemoved()) {
+            if (Vanilla.removed(entity)) {
                 continue;
             }
             double distance = entity.position().distanceToSqr(center);
@@ -128,10 +128,10 @@ public final class LightTracker {
 
     private static BlockPos lightPos(Entity entity) {
         if (entity instanceof LivingEntity) {
-            return BlockPos.containing(entity.getEyePosition());
+            return Vanilla.blockPos(entity.getEyePosition(1.0F));
         }
         AABB box = entity.getBoundingBox();
-        return BlockPos.containing(box.getCenter());
+        return Vanilla.blockPos(box.getCenter());
     }
 
     private static void update(Minecraft mc, WickConfig config, List<Candidate> sources) {

@@ -5,11 +5,9 @@
 	"compatibilityLevel": "JAVA_${java_version}",
 	"plugin": "dev.wick.mixin.WickMixinPlugin",
 	"client": [
-		"BlockDisplayAccessor",
 		"ClientLevelMixin",
 		"EntityRendererAccessor",
 		"EntityRendererMixin",
-		"ItemDisplayAccessor",
 		"MinecraftMixin"${pack_mixins}
 	],
 	"injectors": {

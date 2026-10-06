@@ -2,11 +2,13 @@ package dev.wick.selftest;
 
 import dev.wick.client.DataLights;
 import dev.wick.client.LightTracker;
+import dev.wick.client.Vanilla;
 import dev.wick.client.WickClient;
 import dev.wick.client.gui.WickSettingsScreen;
 import dev.wick.config.WickConfig;
 import dev.wick.core.Lights;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -15,12 +17,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -303,15 +305,17 @@ public final class WickSelfTest {
         });
         within(20, () -> LightTracker.sources() == 0, () -> {
             check(LightTracker.sources() == 0, "the worn jack o'lantern kept glowing after it came off");
-            run(mc, "item replace entity @p weapon.mainhand with " + Cmds.lightBlock(5));
         });
-        within(20, () -> LightTracker.sources() == 1, () -> {
-            check(LightTracker.sources() == 1, "a level-5 light block gives no light");
-            BlockPos eye = BlockPos.containing(mc.player.getEyePosition());
-            int packed = Lights.packedAt(eye.getX(), eye.getY(), eye.getZ());
-            check(packed == 5 * 16, "a level-5 light block shines at " + packed / 16.0);
-            run(mc, "item replace entity @p weapon.mainhand with minecraft:air");
-        });
+        if (Cmds.lightBlock(5) != null) {
+            then(1, () -> run(mc, "item replace entity @p weapon.mainhand with " + Cmds.lightBlock(5)));
+            within(20, () -> LightTracker.sources() == 1, () -> {
+                check(LightTracker.sources() == 1, "a level-5 light block gives no light");
+                BlockPos eye = Vanilla.blockPos(mc.player.getEyePosition(1.0F));
+                int packed = Lights.packedAt(eye.getX(), eye.getY(), eye.getZ());
+                check(packed == 5 * 16, "a level-5 light block shines at " + packed / 16.0);
+                run(mc, "item replace entity @p weapon.mainhand with minecraft:air");
+            });
+        }
 
         then(10, () -> run(mc, "summon minecraft:item -4.5 " + floor + " -6.5 "
                 + "{Item:" + Cmds.stack("minecraft:torch") + ",PickupDelay:32767,Age:-32768}"));
@@ -345,10 +349,12 @@ public final class WickSelfTest {
         then(5, () -> run(mc, "kill @e[type=minecraft:blaze]"));
         glows(mc, "minecraft:enderman", "5.5 " + floor + " -6.5 "
                 + "{NoAI:1b,Silent:1b,carriedBlockState:" + Cmds.blockState("minecraft:glowstone") + "}", "an enderman carrying glowstone");
-        glows(mc, "minecraft:item_display", "5.5 " + (floor + 1) + " -6.5 "
-                + "{item:" + Cmds.stack("minecraft:glowstone") + "}", "an item display showing glowstone");
-        glows(mc, "minecraft:block_display", "5 " + floor + " -7 "
-                + "{block_state:" + Cmds.blockState("minecraft:sea_lantern") + "}", "a block display showing a sea lantern");
+        if (Features.DISPLAYS) {
+            glows(mc, "minecraft:item_display", "5.5 " + (floor + 1) + " -6.5 "
+                    + "{item:" + Cmds.stack("minecraft:glowstone") + "}", "an item display showing glowstone");
+            glows(mc, "minecraft:block_display", "5 " + floor + " -7 "
+                    + "{block_state:" + Cmds.blockState("minecraft:sea_lantern") + "}", "a block display showing a sea lantern");
+        }
         glows(mc, "minecraft:furnace_minecart", "5.5 " + floor + " -6.5 {Fuel:30000s}", "a fuelled furnace minecart");
         glows(mc, "minecraft:end_crystal", "5.5 " + floor + " -6.5 {ShowBottom:0b}", "an end crystal");
 
@@ -408,13 +414,13 @@ public final class WickSelfTest {
         });
         within(20, () -> LightTracker.sources() == 1, () -> {
             check(LightTracker.sources() == 1, "an enchanted sword gives no light with Enchanted Glow on");
-            BlockPos eye = BlockPos.containing(mc.player.getEyePosition());
+            BlockPos eye = Vanilla.blockPos(mc.player.getEyePosition(1.0F));
             int packed = Lights.packedAt(eye.getX(), eye.getY(), eye.getZ());
             check(packed == 4 * 16, "an enchanted sword shines at " + packed / 16.0);
             run(mc, "item replace entity @p weapon.mainhand with " + Cmds.storedEnchantment("minecraft:mending", 1));
         });
         then(20, () -> {
-            BlockPos eye = BlockPos.containing(mc.player.getEyePosition());
+            BlockPos eye = Vanilla.blockPos(mc.player.getEyePosition(1.0F));
             int packed = Lights.packedAt(eye.getX(), eye.getY(), eye.getZ());
             check(LightTracker.sources() == 1 && packed == 4 * 16, "an enchanted book shines at " + packed / 16.0);
             if (Cmds.GLINT_STICK != null) {
@@ -423,7 +429,7 @@ public final class WickSelfTest {
         });
         then(20, () -> {
             if (Cmds.GLINT_STICK != null) {
-                BlockPos eye = BlockPos.containing(mc.player.getEyePosition());
+                BlockPos eye = Vanilla.blockPos(mc.player.getEyePosition(1.0F));
                 int packed = Lights.packedAt(eye.getX(), eye.getY(), eye.getZ());
                 check(LightTracker.sources() == 1 && packed == 4 * 16, "a shimmering stick shines at " + packed / 16.0);
             }
@@ -463,7 +469,7 @@ public final class WickSelfTest {
         if (accessoryMod()) {
             then(10, () -> wear(mc, new ItemStack(Items.LANTERN)));
             within(40, () -> LightTracker.sources() == 1, () -> {
-                BlockPos eye = BlockPos.containing(mc.player.getEyePosition());
+                BlockPos eye = Vanilla.blockPos(mc.player.getEyePosition(1.0F));
                 int packed = Lights.packedAt(eye.getX(), eye.getY(), eye.getZ());
                 log("lantern on an accessory belt shines at " + packed / 16.0);
                 check(LightTracker.sources() == 1 && packed == 15 * 16, "a lantern on an accessory belt shines at " + packed / 16.0);
@@ -490,13 +496,13 @@ public final class WickSelfTest {
         });
 
         within(20, () -> LightTracker.sources() == 1, () -> {
-            BlockPos eye = BlockPos.containing(mc.player.getEyePosition());
+            BlockPos eye = Vanilla.blockPos(mc.player.getEyePosition(1.0F));
             int packed = Lights.packedAt(eye.getX(), eye.getY(), eye.getZ());
             check(packed == 9 * 16, "a feather set to 9 by a light file shines at " + packed / 16.0);
             run(mc, "item replace entity @p weapon.mainhand with minecraft:white_wool");
         });
         then(20, () -> {
-            BlockPos eye = BlockPos.containing(mc.player.getEyePosition());
+            BlockPos eye = Vanilla.blockPos(mc.player.getEyePosition(1.0F));
             int packed = Lights.packedAt(eye.getX(), eye.getY(), eye.getZ());
             check(packed == 15 * 16, "wool matched by tag and lit like glowstone shines at " + packed / 16.0);
             run(mc, "item replace entity @p weapon.mainhand with minecraft:air");
@@ -525,13 +531,12 @@ public final class WickSelfTest {
         });
         within(40, () -> LightTracker.sources() == 1, () -> {
             check(LightTracker.sources() == 1, "back in creative the torch gives no light");
-            log("whole run: " + LightTracker.timings() + ", fps " + mc.getFps());
+            log("whole run: " + LightTracker.timings() + ", fps " + Frames.fps(mc));
             run(mc, "item replace entity @p weapon.mainhand with minecraft:air");
         });
 
         then(10, () -> {
-            mc.options.enableVsync().set(false);
-            mc.options.framerateLimit().set(260);
+            Frames.unlock(mc);
             limitOnlyWhenMinimized(mc);
             for (int i = 0; i < 40; i++) {
                 run(mc, String.format(Locale.ROOT, "summon minecraft:zombie %d %d %d "
@@ -581,6 +586,28 @@ public final class WickSelfTest {
             screenshot(mc, "settings");
         });
         then(5, () -> Screens.open(mc, null));
+        if (type("com.terraformersmc.modmenu.ModMenu") != null) {
+            then(5, () -> Screens.open(mc, modMenuScreen()));
+            then(20, () -> {
+                check(Screens.current(mc) instanceof WickSettingsScreen, "Mod Menu did not open Wick's settings");
+                log("Mod Menu opened the settings");
+                screenshot(mc, "settings-modmenu");
+            });
+            then(5, () -> Screens.open(mc, null));
+        }
+    }
+
+    private static Screen modMenuScreen() {
+        try {
+            for (Method method : type("com.terraformersmc.modmenu.ModMenu").getMethods()) {
+                if (method.getName().equals("getConfigScreen") && method.getParameterCount() == 2) {
+                    return (Screen) method.invoke(null, WickClient.MOD_ID, null);
+                }
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("Mod Menu could not make Wick's settings screen", e);
+        }
+        throw new AssertionError("Mod Menu has no getConfigScreen");
     }
 
     private void glows(Minecraft mc, String type, String where, String what) {
@@ -674,7 +701,7 @@ public final class WickSelfTest {
 
     private static Entity find(Minecraft mc, String type) {
         for (Entity entity : mc.level.entitiesForRendering()) {
-            if (BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString().equals(type)) {
+            if (Vanilla.entityId(entity.getType()).equals(type)) {
                 return entity;
             }
         }

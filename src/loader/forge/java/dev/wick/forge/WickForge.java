@@ -1,14 +1,8 @@
 package dev.wick.forge;
 
-import dev.wick.client.DataLights;
 import dev.wick.client.WickClient;
-import dev.wick.client.gui.WickSettingsScreen;
 import net.minecraft.client.KeyMapping;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -32,13 +26,6 @@ public final class WickForge {
 
         KeyMapping toggle = WickClient.createToggleKey();
         WickClient.setToggleKey(toggle);
-        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modBus.addListener((RegisterKeyMappingsEvent event) -> event.register(toggle));
-        modBus.addListener((RegisterClientReloadListenersEvent event) -> event.registerReloadListener(DataLights.listener()));
-
-        context.registerExtensionPoint(
-                ConfigScreenHandler.ConfigScreenFactory.class,
-                () -> new ConfigScreenHandler.ConfigScreenFactory(
-                        (client, parent) -> new WickSettingsScreen(parent, client.options)));
+        ForgeClient.register(context, FMLJavaModLoadingContext.get().getModEventBus(), toggle);
     }
 }

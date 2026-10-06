@@ -1,5 +1,6 @@
 package dev.wick.mixin;
 
+import dev.wick.client.Vanilla;
 import dev.wick.core.Lights;
 import dev.wick.core.Packed;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 abstract class EntityRendererMixin {
     @Inject(method = "getPackedLightCoords", at = @At("RETURN"), cancellable = true)
     private void wick$dynamic(Entity entity, float partialTicks, CallbackInfoReturnable<Integer> cir) {
-        BlockPos pos = BlockPos.containing(entity.getLightProbePosition(partialTicks));
+        BlockPos pos = Vanilla.blockPos(entity.getLightProbePosition(partialTicks));
         int dynamic = Lights.packedAt(pos.getX(), pos.getY(), pos.getZ());
         if (dynamic > 0) {
             cir.setReturnValue(Packed.withDynamic(cir.getReturnValueI(), dynamic));

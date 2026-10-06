@@ -1,13 +1,9 @@
 package dev.wick.client;
 
 import dev.wick.config.WickConfig;
-import dev.wick.mixin.BlockDisplayAccessor;
-import dev.wick.mixin.ItemDisplayAccessor;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -56,10 +52,8 @@ public final class EntityLights {
                 level = Math.max(level, ItemLights.level(item.getItem(), item.isInWater(), config));
             } else if (entity instanceof ItemFrame frame) {
                 level = Math.max(level, ItemLights.level(frame.getItem(), inWater(frame), config));
-            } else if (entity instanceof Display.ItemDisplay display) {
-                level = Math.max(level, ItemLights.level(((ItemDisplayAccessor) display).wick$item(), inWater(display), config));
-            } else if (entity instanceof Display.BlockDisplay display) {
-                level = Math.max(level, emission(((BlockDisplayAccessor) display).wick$block()));
+            } else {
+                level = Math.max(level, Displays.level(entity, config));
             }
         }
         if (config.glowingMobs()) {
@@ -68,11 +62,11 @@ public final class EntityLights {
         return level;
     }
 
-    private static boolean inWater(Entity entity) {
-        return entity.level().getFluidState(entity.blockPosition()).is(FluidTags.WATER);
+    static boolean inWater(Entity entity) {
+        return Vanilla.level(entity).getFluidState(entity.blockPosition()).is(FluidTags.WATER);
     }
 
-    private static int emission(BlockState state) {
+    static int emission(BlockState state) {
         return state == null ? 0 : state.getLightEmission();
     }
 
@@ -90,10 +84,10 @@ public final class EntityLights {
     private static final Reference2BooleanOpenHashMap<EntityType<?>> MODDED = new Reference2BooleanOpenHashMap<>();
 
     private static int selfLit(Entity entity) {
-        if (entity.isOnFire() || entity instanceof Display || entity instanceof ItemFrame || !modded(entity.getType())) {
+        if (entity.isOnFire() || Displays.is(entity) || entity instanceof ItemFrame || !modded(entity.getType())) {
             return 0;
         }
-        BlockPos pos = BlockPos.containing(entity.getLightProbePosition(1.0F));
+        BlockPos pos = Vanilla.blockPos(entity.getLightProbePosition(1.0F));
         int drawn;
         try {
             drawn = RendererCompat.blockLight(entity, pos);
@@ -101,13 +95,13 @@ public final class EntityLights {
             MODDED.put(entity.getType(), false);
             return 0;
         }
-        int around = entity.level().getBrightness(LightLayer.BLOCK, pos);
+        int around = Vanilla.level(entity).getBrightness(LightLayer.BLOCK, pos);
         return drawn > around ? Math.min(drawn, SELF_LIT_MAX) : 0;
     }
 
     private static boolean modded(EntityType<?> type) {
         if (!MODDED.containsKey(type)) {
-            MODDED.put(type, !BuiltInRegistries.ENTITY_TYPE.getKey(type).getNamespace().equals("minecraft"));
+            MODDED.put(type, !Vanilla.entityNamespace(type).equals("minecraft"));
         }
         return MODDED.getBoolean(type);
     }

@@ -102,6 +102,11 @@ dependencies {
 		modCompileOnly("com.terraformersmc:modmenu:${versionProps.getProperty('modmenu_version')}") {
 			transitive = false
 		}
+		if (project.hasProperty("modmenu")) {
+			modRuntimeOnly("com.terraformersmc:modmenu:${versionProps.getProperty('modmenu_version')}") {
+				transitive = false
+			}
+		}
 	} else if (fabric) {
 		minecraft "com.mojang:minecraft:${gameVersion}"
 		implementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -155,6 +160,10 @@ if (sodiumVersion != null) {
 						}
 					}
 				}
+			}
+			def sodiumRuntime = versionProps.getProperty("sodium_runtime")
+			if (sodiumRuntime != null) {
+				runtimeOnly sodiumRuntime
 			}
 			if (fabric) {
 				add(remap ? "modRuntimeOnly" : "runtimeOnly", sodium) {
@@ -337,7 +346,7 @@ test {
 processResources {
 	inputs.properties(expansions)
 
-	filesMatching(["fabric.mod.json", "wick.mixins.json", "META-INF/neoforge.mods.toml", "META-INF/mods.toml"]) {
+	filesMatching(["fabric.mod.json", "wick.mixins.json", "META-INF/neoforge.mods.toml", "META-INF/mods.toml", "pack.mcmeta"]) {
 		expand expansions
 	}
 	if (forge) {
@@ -350,7 +359,7 @@ processResources {
 processSelftestResources {
 	inputs.properties(expansions)
 
-	filesMatching("wick_selftest.mixins.json") {
+	filesMatching(["wick_selftest.mixins.json", "pack.mcmeta"]) {
 		expand expansions
 	}
 }

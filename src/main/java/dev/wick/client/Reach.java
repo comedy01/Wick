@@ -39,13 +39,12 @@ final class Reach {
                 if (index >= 0 && index < sections) {
                     LevelChunk chunk = level.getChunkSource().getChunk(cx, cz, false);
                     if (chunk != null) {
-                        last = chunk.getSection(index);
+                        last = BlockCompat.section(chunk, index);
                     }
                 }
             }
             LevelChunkSection section = last;
-            return section != null && !section.hasOnlyAir()
-                    && BlockCompat.solid(section.getBlockState(x & 15, y & 15, z & 15));
+            return section != null && BlockCompat.solid(section.getBlockState(x & 15, y & 15, z & 15));
         }
     }
 }

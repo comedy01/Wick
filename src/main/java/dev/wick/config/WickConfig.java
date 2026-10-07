@@ -181,7 +181,7 @@ public final class WickConfig {
         Map<String, Integer> clean = new LinkedHashMap<>();
         if (items != null) {
             items.forEach((id, level) -> {
-                if (id != null && !id.isBlank() && level != null) {
+                if (id != null && !id.trim().isEmpty() && level != null) {
                     clean.put(normalizeId(id), clamp(level, 0, 15));
                 }
             });

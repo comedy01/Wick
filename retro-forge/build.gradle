@@ -1,0 +1,100 @@
+import groovy.json.JsonSlurper
+
+plugins {
+	id 'com.gtnewhorizons.retrofuturagradle' version '2.0.6'
+}
+
+def root = file('..')
+def minecraftVersion = '1.12.2'
+
+def rootProps = new Properties()
+file("${root}/gradle.properties").withInputStream { rootProps.load(it) }
+def versionProps = new Properties()
+file("${root}/versions/forge/${minecraftVersion}.properties").withInputStream { versionProps.load(it) }
+
+def modId = rootProps.archives_base_name
+def withSelftest = project.hasProperty('selftest')
+def coreMod = 'dev.wick.asm.WickCore'
+
+version = "${rootProps.mod_version}+mc${versionProps.label}"
+group = rootProps.maven_group
+
+def expansions = [version: project.version]
+versionProps.stringPropertyNames().each { expansions[it] = versionProps.getProperty(it) }
+
+base {
+	archivesName = "${modId}-forge"
+}
+
+java {
+	toolchain.languageVersion = JavaLanguageVersion.of(8)
+}
+
+minecraft {
+	mcVersion = minecraftVersion
+	extraRunJvmArguments.add("-Dfml.coreMods.load=${coreMod}".toString())
+	extraRunJvmArguments.addAll(project.properties.findAll { it.key.startsWith('wk.') }.collect { "-Dwick.${it.key.substring(3)}=${it.value}".toString() })
+}
+
+def langDir = layout.buildDirectory.dir('generated/lang')
+def legacyLang = tasks.register('legacyLang') {
+	def source = file("${root}/src/main/resources/assets/${modId}/lang/en_us.json")
+	inputs.file source
+	outputs.dir langDir
+	doLast {
+		def target = langDir.get().file("assets/${modId}/lang/en_us.lang").asFile
+		target.parentFile.mkdirs()
+		target.setText(new JsonSlurper().parse(source, 'UTF-8').collect { "${it.key}=${it.value}" }.join('\n') + '\n', 'UTF-8')
+	}
+}
+
+sourceSets {
+	main {
+		java.srcDirs = ["${root}/src/main/java", "${root}/src/loader/forge-112/java"]
+		java.exclude { element ->
+			def path = element.relativePath.pathString
+			!element.directory && element.file.toPath().startsWith(file("${root}/src/main/java").toPath())
+					&& !(path.startsWith("dev/${modId}/core/") || path.startsWith("dev/${modId}/config/"))
+		}
+		if (withSelftest) {
+			java.srcDir "${root}/src/selftest/forge-112/java"
+		}
+		resources.srcDirs = ["${root}/src/main/resources", "${root}/src/loader/forge-112/resources"]
+		resources.exclude '**/lang/*.json', "${modId}.mixins.json"
+		resources.srcDir legacyLang
+	}
+}
+
+processResources {
+	inputs.properties(expansions)
+	filesMatching(['mcmod.info', 'pack.mcmeta']) {
+		expand expansions
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+}
+
+jar {
+	from("${root}/LICENSE") {
+		rename { "${it}_${base.archivesName.get()}" }
+	}
+	manifest.attributes(
+			'FMLCorePlugin': coreMod,
+			'FMLCorePluginContainsFMLMod': 'true',
+			'ForceLoadAsMod': 'true')
+}
+
+if (withSelftest) {
+	base {
+		archivesName = "${modId}-forge-withtest"
+	}
+	def selftestJar = tasks.register('selftestJar', Zip) {
+		from zipTree(tasks.named('reobfJar').flatMap { it.archiveFile })
+		include "dev/${modId}/selftest/**"
+		archiveFileName = "${modId}-selftest.jar"
+		destinationDirectory = layout.buildDirectory.dir('devlibs')
+	}
+	tasks.named('build') { dependsOn selftestJar }
+}

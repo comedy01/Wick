@@ -1,0 +1,6 @@
+{
+	"pack": {
+		"description": "Wick resources",
+		"pack_format": ${pack_format}
+	}
+}

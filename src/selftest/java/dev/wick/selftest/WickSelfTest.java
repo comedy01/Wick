@@ -18,6 +18,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +39,8 @@ import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
 
 public final class WickSelfTest {
+    private static final Logger LOGGER = LogManager.getLogger("wick-selftest");
+
     private static final String WORLD = "wick-selftest";
     private static final int TIMEOUT = 2400;
 
@@ -140,8 +144,7 @@ public final class WickSelfTest {
         if (failure == null) {
             log("ALL CHECKS PASSED");
         } else {
-            log("FAILED: " + failure);
-            failure.printStackTrace();
+            LOGGER.error("[wick-selftest] FAILED: " + failure, failure);
         }
         WickConfig config = WickClient.config();
         config.resetToDefaults();
@@ -811,6 +814,6 @@ public final class WickSelfTest {
     }
 
     static void log(String message) {
-        System.out.println("[wick-selftest] " + message);
+        LOGGER.info("[wick-selftest] " + message);
     }
 }

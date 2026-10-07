@@ -23,7 +23,7 @@ def javaVersion = versionProps.getProperty("java").toInteger()
 def selftestArgs = ["--width", "1920", "--height", "1080", "--username", "Wick"]
 def selftestJvm = ["-Xmx3G"] + project.properties.findAll { it.key.startsWith("wk.") }.collect { "-Dwick.${it.key.substring(3)}=${it.value}" }
 
-def expansions = [java_version: javaVersion]
+def expansions = [java_version: javaVersion, fabric_api_id: "fabric-api", fabric_loader_min: ">=0.19.3"]
 def packMixins = packs.collectMany { pack ->
 	def list = file("src/compat/${pack}/mixins.txt")
 	list.exists() ? list.readLines().collect { it.trim() }.findAll { !it.isEmpty() } : []
@@ -257,7 +257,11 @@ if (neoforge) {
 	}
 
 	legacyForge {
-		version = versionProps.getProperty("forge_version")
+		if (versionProps.getProperty("neoforge_version") != null) {
+			enable { neoForgeVersion = versionProps.getProperty("neoforge_version") }
+		} else {
+			version = versionProps.getProperty("forge_version")
+		}
 		addModdingDependenciesTo(sourceSets.selftest)
 		mods {
 			wick {
@@ -283,8 +287,13 @@ if (neoforge) {
 		}
 	}
 
+	dependencies {
+		selftestAnnotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+	}
+
 	mixin {
 		add sourceSets.main, "wick.refmap.json"
+		add sourceSets.selftest, "wick_selftest.refmap.json"
 		config "wick.mixins.json"
 	}
 
@@ -311,6 +320,44 @@ if (neoforge) {
 				programArgs selftestArgs
 				vmArgs selftestJvm
 			}
+		}
+	}
+}
+
+if (forge || remap) {
+	if (remap) {
+		loom {
+			mixin {
+				add sourceSets.selftest, "wick_selftest.refmap.json"
+			}
+		}
+	}
+
+	def selftestJar = tasks.register("selftestJar", Jar) {
+		from sourceSets.selftest.output
+		archiveBaseName = "${project.archives_base_name}-selftest"
+		archiveClassifier = "dev"
+		destinationDirectory = layout.buildDirectory.dir("devlibs")
+		if (forge) {
+			manifest.attributes("MixinConfigs": "wick_selftest.mixins.json")
+		}
+	}
+
+	if (forge) {
+		["selftestRuntimeElements", "selftestApiElements"].each { name ->
+			configurations.create(name) {
+				canBeConsumed = true
+				canBeResolved = false
+			}
+		}
+		obfuscation.reobfuscate(selftestJar, sourceSets.selftest) {
+			archiveClassifier = ""
+		}
+	} else {
+		tasks.register("remapSelftestJar", net.fabricmc.loom.task.RemapJarTask) {
+			inputFile = selftestJar.flatMap { it.archiveFile }
+			archiveBaseName = "${project.archives_base_name}-selftest"
+			addNestedDependencies = false
 		}
 	}
 }
@@ -361,6 +408,11 @@ processSelftestResources {
 
 	filesMatching(["wick_selftest.mixins.json", "pack.mcmeta"]) {
 		expand expansions
+	}
+	if (forge) {
+		filesMatching("wick_selftest.mixins.json") {
+			filter { line -> line.contains('"package"') ? line + '\n\t"refmap": "wick_selftest.refmap.json",' : line }
+		}
 	}
 }
 

@@ -5,15 +5,16 @@ dropped torch keeps shining on the ground, burning mobs light their surroundings
 
 Wick is a small client-side mod for Minecraft on Fabric, NeoForge and Forge, compatible with Mod Menu on Fabric.
 
-Supported versions: Fabric 1.18.2, 1.19.2 and 1.20 to 26.3, NeoForge 1.21 to 26.3, Forge 1.16.5, 1.18.2, 1.19.2 and
-1.20.1. Works with Sodium, Embeddium and Iris.
+Supported versions: Fabric 1.18.2 and 1.19 to 26.3, NeoForge 1.20.1 and 1.21 to 26.3, Forge 1.12.2, 1.16.5, 1.18.2,
+1.19.2 and 1.20.1. Works with Sodium, Embeddium and Iris, and with OptiFine on 1.12.2.
 
 ## Features
 
 - **Held and worn items** - torches, lanterns, glowstone, sea lanterns, lava buckets, blaze rods and any other glowing
   item, in either hand or on your head (a jack o'lantern helmet works). Endermen carrying a glowing block glow too.
 - **Accessory slots** - a lantern on your belt or a glowing charm in a [Curios](https://modrinth.com/mod/curios) or
-  [Trinkets](https://modrinth.com/mod/trinkets-updated) slot shines like a held one. Neither mod is required.
+  [Trinkets](https://modrinth.com/mod/trinkets-updated) slot (or [Baubles](https://www.curseforge.com/minecraft/mc-mods/baubles)
+  on 1.12.2) shines like a held one. Neither mod is required.
 - **Other players and mobs** - a zombie carrying a torch lights its way too. Turn this off to keep only your own light.
 - **Dropped and displayed items** - a torch on the ground, in an item frame or on an item or block display keeps
   glowing.
@@ -50,10 +51,10 @@ Optional: add [Mod Menu](https://modrinth.com/mod/modmenu) to get a settings scr
 **NeoForge**
 
 1. Install NeoForge for your version of Minecraft.
-2. Put the NeoForge Wick jar in your `mods` folder.
+2. Put the NeoForge Wick jar in your `mods` folder (on 1.20.1, the Forge 1.20.1 jar).
 3. Start the game. Settings are under *Mods > Wick > Config*.
 
-**Forge (1.16.5, 1.18.2, 1.19.2, 1.20.1)**
+**Forge (1.12.2, 1.16.5, 1.18.2, 1.19.2, 1.20.1)**
 
 1. Install Forge for your version of Minecraft.
 2. Put the Forge Wick jar in your `mods` folder.
@@ -62,5 +63,6 @@ Optional: add [Mod Menu](https://modrinth.com/mod/modmenu) to get a settings scr
 ## Building
 
 `./gradlew build -Pminecraft_version=26.3` builds the Fabric jar; add `-Ploader=neoforge` or `-Ploader=forge` for the other loaders (version configs in `versions/`).
-Forge 1.16.5 builds from `legacy-forge/`: `cd legacy-forge && ./gradlew build`.
+Forge 1.16.5 builds from `legacy-forge/`: `cd legacy-forge && ./gradlew build`. Forge 1.12.2 builds from `retro-forge/`:
+`cd retro-forge && ./gradlew build`.
 `./gradlew runSelftest` launches the game and runs the in-world checks.

@@ -21,7 +21,6 @@ public final class WickTransformer implements IClassTransformer {
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        // Celeritas meshes chunks from its own WorldSlice instead of ChunkCache
         if (basicClass == null || !("net.minecraft.world.World".equals(transformedName)
                 || "net.minecraft.world.ChunkCache".equals(transformedName)
                 || "org.taumc.celeritas.impl.world.WorldSlice".equals(transformedName))) {

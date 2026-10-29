@@ -6,7 +6,8 @@ dropped torch keeps shining on the ground, burning mobs light their surroundings
 Wick is a small client-side mod for Minecraft on Fabric, NeoForge and Forge, compatible with Mod Menu on Fabric.
 
 Supported versions: Fabric 1.18.2 and 1.19 to 26.3, NeoForge 1.20.1 and 1.21 to 26.3, Forge 1.12.2, 1.16.5, 1.18.2,
-1.19.2 and 1.20.1. Works with Sodium, Embeddium and Iris, and with OptiFine on 1.12.2.
+1.19.2 and 1.20.1. Works with Sodium, Embeddium and Iris, and on 1.12.2 with OptiFine, Celeritas, Alfheim and
+Cleanroom.
 
 ## Features
 
